@@ -4,7 +4,6 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using WebApp.Data;
 using WebApp.Models;
@@ -13,12 +12,17 @@ namespace WebApp.Controllers
 {
     public class GroupController : Controller
     {
-        private WebAppContext db = new WebAppContext();
+        private readonly IDataRepository _db;
+
+        public GroupController(IDataRepository repo)
+        {
+            _db = repo;
+        }
 
         // GET: Group
         public ActionResult Index()
         {
-            return View(db.Groups.ToList());
+            return View(_db.GetAllGroups());
         }
 
         // GET: Group/Details/5
@@ -28,7 +32,7 @@ namespace WebApp.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Group group = db.Groups.Find(id);
+            Group group = _db.GetGroup((int)id);
             if (group == null)
             {
                 return HttpNotFound();
@@ -51,8 +55,7 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Groups.Add(group);
-                db.SaveChanges();
+                _db.AddOrUpdateGroup(group);
                 return RedirectToAction("Index");
             }
 
@@ -66,7 +69,7 @@ namespace WebApp.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Group group = db.Groups.Find(id);
+            Group group = _db.GetGroup((int)id);
             if (group == null)
             {
                 return HttpNotFound();
@@ -83,8 +86,7 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(group).State = EntityState.Modified;
-                db.SaveChanges();
+                _db.AddOrUpdateGroup(group);
                 return RedirectToAction("Index");
             }
             return View(group);
@@ -97,7 +99,7 @@ namespace WebApp.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Group group = db.Groups.Find(id);
+            Group group = _db.GetGroup((int)id);
             if (group == null)
             {
                 return HttpNotFound();
@@ -110,9 +112,7 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Group group = db.Groups.Find(id);
-            db.Groups.Remove(group);
-            db.SaveChanges();
+            _db.RemoveGroup(_db.GetGroup(id));
             return RedirectToAction("Index");
         }
 
@@ -120,7 +120,7 @@ namespace WebApp.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }

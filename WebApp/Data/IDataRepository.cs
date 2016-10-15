@@ -7,13 +7,13 @@ using WebApp.Models;
 
 namespace WebApp.Data
 {
-    interface IDataRepository
+    public interface IDataRepository
     {
         //USER
         List<User> GetAllUsers();
         void AddOrUpdateUser(User user);
         User GetUser(int id);
-        void RemovePerson(User user);
+        void RemoveUser(User user);
         //GROUP
         List<Group> GetAllGroups();
         void AddOrUpdateGroup(Group group);
@@ -24,5 +24,6 @@ namespace WebApp.Data
         void AddOrUpdateEvent(Event anEvent);
         Event GetEvent(int id);
         void RemoveEvent(Event anEvent);
+        void Dispose();
     }
 }

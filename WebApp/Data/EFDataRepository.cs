@@ -16,7 +16,7 @@ namespace WebApp.Data
             _dbc = new WebAppContext();
         }
 
-        void IDataRepository.AddOrUpdateEvent(Event anEvent)
+        public void AddOrUpdateEvent(Event anEvent)
         {
             if (anEvent.EventID == default(int))
                 _dbc.Entry(anEvent).State = EntityState.Added;
@@ -26,7 +26,7 @@ namespace WebApp.Data
             _dbc.SaveChanges();
         }
 
-        void IDataRepository.AddOrUpdateGroup(Group group)
+        public void AddOrUpdateGroup(Group group)
         {
             if (group.GroupID == default(int))
                 _dbc.Entry(group).State = EntityState.Added;
@@ -36,7 +36,7 @@ namespace WebApp.Data
             _dbc.SaveChanges();
         }
 
-        void IDataRepository.AddOrUpdateUser(User user)
+        public void AddOrUpdateUser(User user)
         {
             if (user.ID == default(int))
                 _dbc.Entry(user).State = EntityState.Added;
@@ -46,52 +46,57 @@ namespace WebApp.Data
             _dbc.SaveChanges();
         }
 
-        List<Event> IDataRepository.GetAllEvents()
+        public List<Event> GetAllEvents()
         {
             return _dbc.Events.ToList();
         }
 
-        List<Group> IDataRepository.GetAllGroups()
+        public List<Group> GetAllGroups()
         {
             return _dbc.Groups.ToList();
         }
 
-        List<User> IDataRepository.GetAllUsers()
+        public List<User> GetAllUsers()
         {
             return _dbc.Users.ToList();
         }
 
-        Event IDataRepository.GetEvent(int id)
+        public Event GetEvent(int id)
         {
             return _dbc.Events.Find(id);
         }
 
-        Group IDataRepository.GetGroup(int id)
+        public Group GetGroup(int id)
         {
             return _dbc.Groups.Find(id);
         }
 
-        User IDataRepository.GetUser(int id)
+        public User GetUser(int id)
         {
             return _dbc.Users.Find(id);
         }
 
-        void IDataRepository.RemoveEvent(Event anEvent)
+        public void RemoveEvent(Event anEvent)
         {
             _dbc.Events.Remove(anEvent);
             _dbc.SaveChanges();
         }
 
-        void IDataRepository.RemoveGroup(Group group)
+        public void RemoveGroup(Group group)
         {
             _dbc.Groups.Remove(group);
             _dbc.SaveChanges();
         }
 
-        void IDataRepository.RemovePerson(User user)
+        public void RemoveUser(User user)
         {
             _dbc.Users.Remove(user);
             _dbc.SaveChanges();
+        }
+
+        public void Dispose()
+        {
+            _dbc.Dispose();
         }
     }
 }

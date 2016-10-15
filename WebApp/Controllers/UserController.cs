@@ -13,28 +13,32 @@ namespace WebApp.Controllers
 {
     public class UserController : Controller
     {
-        private WebAppContext db = new WebAppContext();
+        private readonly IDataRepository _db;
 
+        public UserController(IDataRepository repo)
+        {
+            _db = repo;
+        }
         // GET: User
         public ActionResult Index()
         {
-            return View(db.Users.ToList());
+            return View(_db.GetAllUsers());
         }
 
         // GET: User/Details/5
-        //public ActionResult Details(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-        //    }
-        //    User user = db.Users.Find(id);
-        //    if (user == null)
-        //    {
-        //        return HttpNotFound();
-        //    }
-        //    return View(user);
-        //}
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            User user = _db.GetUser((int)id);
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+            return View(user);
+        }
 
         // GET: User/Create
         public ActionResult Create()
@@ -51,8 +55,7 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Users.Add(user);
-                db.SaveChanges();
+                _db.AddOrUpdateUser(user);
                 return RedirectToAction("Index");
             }
 
@@ -66,7 +69,7 @@ namespace WebApp.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            User user = db.Users.Find(id);
+            User user = _db.GetUser((int)id);
             if (user == null)
             {
                 return HttpNotFound();
@@ -83,8 +86,7 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(user).State = EntityState.Modified;
-                db.SaveChanges();
+                _db.RemoveUser(user);
                 return RedirectToAction("Index");
             }
             return View(user);
@@ -97,7 +99,7 @@ namespace WebApp.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            User user = db.Users.Find(id);
+            User user = _db.GetUser((int)id);
             if (user == null)
             {
                 return HttpNotFound();
@@ -110,9 +112,7 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            User user = db.Users.Find(id);
-            db.Users.Remove(user);
-            db.SaveChanges();
+            _db.RemoveUser(_db.GetUser(id));
             return RedirectToAction("Index");
         }
 
@@ -120,7 +120,7 @@ namespace WebApp.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }

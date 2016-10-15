@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApp.Models
 {
@@ -24,5 +25,8 @@ namespace WebApp.Models
         public string EventName { get; set; }
 
         public List<User> users { get; set; }
+
+        [NotMapped]
+        public bool isHoliday { get; set; }
     }
 }

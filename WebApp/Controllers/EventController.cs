@@ -8,22 +8,25 @@ using System.Web;
 using System.Web.Mvc;
 using WebApp.Data;
 using WebApp.Models;
+using WebApp.Service;
 
 namespace WebApp.Controllers
 {
     public class EventController : Controller
     {
-        private EFDataRepository db;
+        private readonly IDataRepository _db;
+        private readonly IEventService _es;
 
-        public EventController(EFDataRepository repo)
+        public EventController(IDataRepository repo, IEventService eventService)
         {
-            db = repo;
+            _db = repo;
+            _es = eventService;
         }
 
         // GET: Event
         public ActionResult Index()
         {
-            return View(db.Events.ToList());
+            return View(_db.GetAllEvents());
         }
 
         // GET: Event/Details/5
@@ -33,11 +36,17 @@ namespace WebApp.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Event @event = db.Events.Find(id);
+            Event @event = _db.GetEvent((int)id);
+            
             if (@event == null)
             {
                 return HttpNotFound();
             }
+
+            if (_es.CheckIfHoliday(@event))
+                ViewBag.Holiday = "Holiday";
+            else
+                ViewBag.Holiday = "";
             return View(@event);
         }
 
@@ -56,8 +65,7 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Events.Add(@event);
-                db.SaveChanges();
+                _db.AddOrUpdateEvent(@event);
                 return RedirectToAction("Index");
             }
 
@@ -71,7 +79,7 @@ namespace WebApp.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Event @event = db.Events.Find(id);
+            Event @event = _db.GetEvent((int)id);
             if (@event == null)
             {
                 return HttpNotFound();
@@ -88,8 +96,7 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(@event).State = EntityState.Modified;
-                db.SaveChanges();
+                _db.AddOrUpdateEvent(@event);
                 return RedirectToAction("Index");
             }
             return View(@event);
@@ -102,7 +109,7 @@ namespace WebApp.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Event @event = db.Events.Find(id);
+            Event @event = _db.GetEvent((int)id);
             if (@event == null)
             {
                 return HttpNotFound();
@@ -115,9 +122,7 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Event @event = db.Events.Find(id);
-            db.Events.Remove(@event);
-            db.SaveChanges();
+            _db.RemoveEvent(_db.GetEvent(id));
             return RedirectToAction("Index");
         }
 
@@ -125,7 +130,7 @@ namespace WebApp.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }
